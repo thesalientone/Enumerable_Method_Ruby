@@ -1,0 +1,179 @@
+module Enumerable
+  def my_each
+    n = self.length 
+    for j in (0...n)
+      yield(self[j])
+    end 
+  end 
+  
+  def my_each_with_index
+    n = self.length
+    for j in (0...n)
+      yield(self[j], j)
+    end
+  end 
+  
+  def my_select
+    selected = []
+    n = self.length
+    for j in (0...n)
+      if yield(self[j])
+        selected << self[j]
+      end 
+    end
+    return selected
+  end 
+  
+  def my_all?
+    flag = true 
+    n = self.length 
+    for j in (0...n)
+      if not yield(self[j])
+        flag = false 
+      end 
+    end 
+    return flag
+    
+  end 
+  def my_none?
+     
+    n = self.length 
+    for j in (0...n)
+      if yield(self[j])
+        return false  
+      end 
+    end 
+    return true 
+    
+  end 
+  def my_count
+    count = 0 
+    n = self.length 
+    for j in (0...n)
+      if yield(self[j])
+        count += 1  
+      end 
+    end 
+    return count
+    
+  end 
+  
+  def my_map
+    mapped = []
+    n = self.length 
+    for j in (0...n)
+      mapped[j] = yield(self[j])
+    end 
+    return mapped
+    
+  end 
+  
+  def my_inject(*args)
+    if args.length > 2 
+      puts "Error, too many arguments"
+      return nil 
+    end 
+    
+    if args.length == 1 && args[0].is_a?(Symbol)
+       
+      accumulated = self[0]
+      n = self.length 
+      for j in (1...n)
+        accumulated = accumulated.send args[0], self[j]
+      end 
+      return accumulated
+    end
+    
+    if args.length == 2 
+      accumulated = self[args[0]-1]
+      n = self.length
+      start = args[0]
+      for j in (start...n)
+        accumulated = accumulated.send args[1], self[j]
+      end 
+      return accumulated
+    end
+    
+    if args.length == 1 && args[0].is_a?(Integer)
+        accumulated = self[args[0]-1]
+        n = self.length 
+        start = args[0]
+        for j in (start...n) 
+        
+          accumulated = yield(accumulated, self[j])
+          
+        
+        end
+       return accumulated
+    end 
+  
+    if args.length == 0 
+      accumulated = self[0]
+      n = self.length 
+      start = args[0]
+      for j in (1...n)
+        accumulated = yield(accumulated, self[j])
+      end 
+      return accumulated 
+    end 
+    
+  end 
+  
+    def my_inject2 n = 0
+
+    return self.to_enum if !block_given?
+    array = [n] + self
+    total = 0
+    for i in array
+      total = yield(total, i)
+    end
+    total
+    end
+  
+  
+  
+end 
+
+def multiply_els(numbers)
+  return numbers.my_inject(:*)
+  
+end 
+
+=begin 
+Below are tests used to confirm functionality of the methods. 
+A = Array.new(10) {|x| x + 4}
+
+A.my_each{|i| puts i}
+
+A.each{|i| puts i}
+
+A.my_each_with_index{|value, index| puts "Value: #{value}, Index: #{index}"}
+A.each_with_index{|value, index| puts "Value: #{value}, Index: #{index}"}
+
+puts A.select{|x| x > 10}
+puts A.my_select{|x| x > 10}
+
+puts A.all? {|x| x.is_a? Float}
+puts A.my_all? {|x| x.is_a? Float}
+
+puts A.none? {|x| x.is_a? String}
+puts A.my_none? {|x| x.is_a? String}
+
+puts A.count {|x| x > 7}
+puts A.my_count {|x| x > 7}
+
+puts A.map {|x| x ** 2}
+puts A.my_map {|x| x ** 2}
+
+A.my_inject("test", :symbols, "test")
+puts A.my_inject(:+)
+puts A.my_inject(2, :+)
+puts A.my_inject(2){|sum, n| sum + n}
+puts A.my_inject{|sum, n| sum + n}
+
+puts multiply_els([2,4,5])
+
+testProc = Proc.new { |x| x * 2}
+ 
+puts A.my_map(&testProc)
+=end 
